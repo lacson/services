@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  homebridge:
+    image: oznu/homebridge:ubuntu
+    container_name: homebridge
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hb.rule=Host(`homebridge.jarvis`, `homebridge.jarvis.local`)"
+      - "traefik.http.routers.hb.entrypoints=web"
+      - "traefik.http.services.hb.loadbalancer.server.port=8581"
+    restart: always
+    network_mode: host
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - HOMEBRIDGE_CONFIG_UI=1
+      - HOMEBRIDGE_CONFIG_UI_PORT=8581
+      - TZ=America/New_York
+    volumes:
+      - ./homebridge:/homebridge

@@ -1,0 +1,41 @@
+version: "2"
+
+# https://github.com/pi-hole/docker-pi-hole/blob/master/README.md
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8582:80/tcp"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.jarvis`,`pihole.jarvis.local`)"
+      - "traefik.http.routers.pihole.entrypoints=web"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+    environment:
+      TZ: 'America/New_York'
+      FTLCONF_REPLY_ADDR4: '192.168.1.254'
+      FTLCONF_REPLY_ADDR6: '2601:14a:c100:13:96de:80ff:fe6a:d573'
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+      - './var-log/pihole.log:/var/log/pihole.log'
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    networks: 
+      - ipv6
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+
+networks:
+  ipv6:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+     config:
+        - subnet: "fd01::/64"
